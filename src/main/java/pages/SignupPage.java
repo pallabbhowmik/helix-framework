@@ -1,10 +1,10 @@
-package com.helix.automation.framework.pages;
+package pages;
 
-import com.helix.automation.framework.core.BasePage;
-import com.helix.automation.framework.config.ConfigManager;
+import config.ConfigManager;
+import core.BasePage;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 public class SignupPage extends BasePage {
     // Helper to try multiple locator strategies in order: id, name, css, xpath

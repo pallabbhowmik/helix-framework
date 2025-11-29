@@ -1,6 +1,6 @@
-package com.helix.automation.framework.core;
+package core;
 
-import com.helix.automation.framework.config.ConfigManager;
+import config.ConfigManager;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -39,19 +39,11 @@ public class BasePage {
 
         // 1) Focus the field
         el.click();
-
-        // 2) Hard clear via JavaScript (handles auto-filled & stubborn fields)
-        try {
-            ((JavascriptExecutor) driver)
-                    .executeScript("arguments[0].value='';", el);
-        } catch (Exception ignored) {
-        }
-
-        // 3) Extra safety – select all & delete anything still there
+        // 2) Select all existing text
         el.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+        // 3) Delete selection
         el.sendKeys(Keys.DELETE);
-
-        // 4) Type the new text
+        // 4) Type new text
         el.sendKeys(text);
     }
 

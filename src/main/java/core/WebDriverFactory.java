@@ -1,6 +1,6 @@
-package com.helix.automation.framework.core;
+package core;
 
-import com.helix.automation.framework.config.ConfigManager;
+import config.ConfigManager;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -11,7 +11,7 @@ import java.time.Duration;
 public class WebDriverFactory {
 
     public static WebDriver create() {
-
+        boolean headless = Boolean.parseBoolean(System.getProperty("headless", "false"));
         String browser = ConfigManager.getBrowser();
         if (browser == null || browser.isEmpty()) {
             browser = "chrome";
@@ -37,22 +37,13 @@ public class WebDriverFactory {
             default: {
                     WebDriverManager.chromedriver().setup();
                     ChromeOptions options = new ChromeOptions();
-
-                    // Enable headless if set via system argument
-                    if (Boolean.parseBoolean(System.getProperty("headless", "false"))) {
+                    if (headless) {
                         options.addArguments("--headless=new");
                     }
 
-                    // 👉 Enable incognito mode
-                    options.addArguments("--incognito");
-
-                    // Optional stability boosts
-                    options.addArguments("--disable-infobars");
-                    options.addArguments("--disable-notifications");
-                    options.addArguments("--disable-extensions");
-
                     driver = new ChromeDriver(options);
-                }
+                    break;
+                    }
         }
 
         long timeout = ConfigManager.getTimeout();

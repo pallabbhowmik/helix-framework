@@ -1,4 +1,4 @@
-package com.helix.automation.framework.core;
+package core;
 
 import org.openqa.selenium.WebDriver;
 

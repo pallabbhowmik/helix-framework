@@ -1,7 +1,7 @@
-package com.helix.automation.framework.pages;
+package pages;
 
-import com.helix.automation.framework.core.BasePage;
-import com.helix.automation.framework.config.ConfigManager;
+import config.ConfigManager;
+import core.BasePage;
 import org.openqa.selenium.By;
 
 public class NotesPage extends BasePage {

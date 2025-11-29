@@ -1,10 +1,11 @@
-package com.helix.automation.tests;
+package tests;
 
-import com.helix.automation.framework.config.ConfigManager;
-import com.helix.automation.framework.core.DriverManager;
-import com.helix.automation.framework.core.WebDriverFactory;
-import com.helix.automation.framework.pages.HomePage;
-import com.helix.automation.framework.pages.LoginPage;
+import config.ConfigManager;
+import core.DriverManager;
+import core.WebDriverFactory;
+import org.testng.annotations.Test;
+import pages.HomePage;
+import pages.LoginPage;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -26,8 +27,7 @@ public abstract class BaseTest {
         System.out.println("Quitting driver");
         DriverManager.quitDriver();
     }
-
-    protected void login() throws InterruptedException {
+    protected void login() {
         String user = ConfigManager.getUsername();
         String pwd  = ConfigManager.getPassword();
 
@@ -36,7 +36,6 @@ public abstract class BaseTest {
             home.clickLogin();
 
             LoginPage loginPage = new LoginPage();
-            Thread.sleep(5000);
             loginPage.enterEmail(user);
             loginPage.enterPassword(pwd);
             loginPage.clickSignInButton();

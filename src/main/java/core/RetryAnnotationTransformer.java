@@ -1,4 +1,4 @@
-package com.helix.automation.framework.core;
+package core;
 
 import org.testng.IAnnotationTransformer;
 import org.testng.annotations.ITestAnnotation;

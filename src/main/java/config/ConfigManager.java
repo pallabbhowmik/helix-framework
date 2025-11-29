@@ -1,4 +1,4 @@
-package com.helix.automation.framework.config;
+package config;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -63,33 +63,33 @@ public final class ConfigManager {
     // --- Convenience getters for your keys ---
 
     public static String getEnv() {
-        return props.getProperty("ENV", "dev");
+        return props.getProperty("HELIX_ENV", "dev");
     }
 
     public static String getBaseUrl() {
-        return props.getProperty("BASE_URL");
+        return props.getProperty("HELIX_BASE_URL");
     }
 
     public static String getApiBaseUrl() {
-        return props.getProperty("API_BASE_URL");
+        return props.getProperty("HELIX_API_BASE_URL");
     }
 
     public static String getBrowser() {
-        return props.getProperty("BROWSER", "chrome");
+        return props.getProperty("HELIX_BROWSER", "chrome");
     }
 
     public static String getRunType() {
-        return props.getProperty("RUN_TYPE", "FULL");
+        return props.getProperty("HELIX_RUN_TYPE", "FULL");
     }
 
     public static String getUsername() {
-        return props.getProperty("USERNAME");
+        return props.getProperty("HELIX_USERNAME");
     }
 
     public static String getPassword() {
-        return props.getProperty("PASSWORD");
+        return props.getProperty("HELIX_PASSWORD");
     }
     public static long getTimeout() {
-        return Long.parseLong(props.getProperty("TIMEOUT"));
+        return Long.parseLong(props.getProperty("HELIX_TIMEOUT"));
     }
 }
