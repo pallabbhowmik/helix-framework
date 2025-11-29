@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="All Modules Suite" parallel="false">
+    <listeners>
+        <listener class-name="com.helix.automation.framework.core.RetryAnnotationTransformer"/>
+    </listeners>
+    <test name="Login">
+        <classes>
+            <class name="com.helix.automation.tests.ui.tests.LoginTests"/>
+        </classes>
+    </test>
+</suite>
