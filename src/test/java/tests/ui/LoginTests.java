@@ -1,20 +1,25 @@
 package tests.ui;
 
-import core.RetryAnalyzer;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.AppPage;
 import tests.BaseTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.time.Duration;
 
 public class LoginTests extends BaseTest {
     @Test(priority = 0)
     public void loginSite() {
         login();
     }
+
     @Test(dependsOnMethods = "loginSite", priority = 1)
-    public void verifyLoginTitle() throws InterruptedException {
+    public void verifyLoginTitle() {
         String expectedTitle = "PassTheNote App Workspace for Automation Practice";
-        Thread.sleep(2000);
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.titleIs(expectedTitle));
         String actualTitle = driver.getTitle();
 
         System.out.println("Page Title After Login: " + actualTitle);
@@ -22,14 +27,13 @@ public class LoginTests extends BaseTest {
         Assert.assertEquals(actualTitle, expectedTitle,
                 "Page title after login is incorrect!");
     }
-    @Test(dependsOnMethods = "loginSite", priority = 2)
-    public void verifyLoginPageItems()  {
 
+    @Test(priority = 2)
+    public void verifyLoginPageItems() {
         AppPage appPage = new AppPage();
-        Assert.assertTrue(appPage.btnLaunchDashboard.isDisplayed(),"The button Launch Dashboard is not visible");
-        Assert.assertTrue(appPage.btnProductDiscovery.isDisplayed(),"The button Product Discovery is not visible");
-        Assert.assertTrue(appPage.btnBrowseChallenges.isEnabled(),"The button Browse Challenges is not enabled");
+        Assert.assertTrue(appPage.isLaunchDashboardVisible(), "The button Launch Dashboard is not visible");
+        Assert.assertTrue(appPage.isProductDiscoveryVisible(), "The button Product Discovery is not visible");
+        Assert.assertTrue(appPage.isBrowseChallengesEnabled(), "The button Browse Challenges is not enabled");
         System.out.println("Page validation completed");
-
     }
 }

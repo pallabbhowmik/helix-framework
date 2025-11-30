@@ -1,0 +1,12 @@
+[
+  {
+    "email": "admin@passthenote.com",
+    "password": "Admin@123",
+    "expectedStatus": 200
+  },
+  {
+    "email": "fake@test.com",
+    "password": "wrongpass",
+    "expectedStatus": 401
+  }
+]

@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="All Modules Suite" parallel="false">
+<suite name="UI Modules Suite" parallel="tests">
     <listeners>
         <listener class-name="core.RetryAnnotationTransformer"/>
         <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
