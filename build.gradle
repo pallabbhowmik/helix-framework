@@ -14,13 +14,18 @@ dependencies {
     implementation "org.testng:testng:7.10.0"
     implementation "io.rest-assured:rest-assured:5.5.0"
     implementation "io.github.bonigarcia:webdrivermanager:5.9.2"
+
+    // Logging (SLF4J + Log4j2 binding)
     implementation "org.slf4j:slf4j-api:2.0.16"
+    implementation "org.apache.logging.log4j:log4j-api:2.24.1"
+    implementation "org.apache.logging.log4j:log4j-core:2.24.1"
     implementation "org.apache.logging.log4j:log4j-slf4j2-impl:2.24.1"
-    implementation("io.qameta.allure:allure-testng:2.29.0")
+
+    implementation "io.qameta.allure:allure-testng:2.29.0"
 }
 
 test {
-    useTestNG(){
+    useTestNG() {
         suites 'src/test/resources/testng_UI.xml'
         suites 'src/test/resources/testng_API.xml'
     }
@@ -29,8 +34,9 @@ test {
     }
     systemProperty "allure.results.directory", "$buildDir/allure-results"
 }
-tasks.register('test_UI', Test)  {
-    useTestNG(){
+
+tasks.register('test_UI', Test) {
+    useTestNG() {
         suites 'src/test/resources/testng_UI.xml'
     }
     if (System.getProperty("headless") != null) {
@@ -38,8 +44,9 @@ tasks.register('test_UI', Test)  {
     }
     systemProperty "allure.results.directory", "$buildDir/allure-results"
 }
-tasks.register('test_API', Test)  {
-    useTestNG(){
+
+tasks.register('test_API', Test) {
+    useTestNG() {
         suites 'src/test/resources/testng_API.xml'
     }
     if (System.getProperty("headless") != null) {

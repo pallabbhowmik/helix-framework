@@ -2,34 +2,33 @@ package pages;
 
 import core.BasePage;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginPage extends BasePage {
 
-    @FindBy(id = "email")
-    private WebElement userName;
+    private static final Logger log = LoggerFactory.getLogger(LoginPage.class);
 
-    @FindBy(id = "password")
-    private WebElement passWord;
-
+    private final By userName  = By.id("email");
+    private final By passWord  = By.id("password");
     private final By signInBtn = By.xpath("//button[text()='Sign In']");
 
     public LoginPage() {
         super();
-        PageFactory.initElements(driver, this);
     }
 
     public void enterEmail(String email) {
-        type(By.id("email"), email);
+        log.info("Entering email on Login page: {}", email);
+        type(userName, email);
     }
 
     public void enterPassword(String password) {
-        type(By.id("password"), password);
+        log.info("Entering password on Login page");
+        type(passWord, password);
     }
 
     public void clickSignInButton() {
+        log.info("Clicking Sign In button on Login page");
         click(signInBtn);
     }
 }

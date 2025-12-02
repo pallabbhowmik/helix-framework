@@ -8,6 +8,7 @@
     <test name="API Tests">
         <classes>
             <class name="tests.api.AuthApiTests"/>
+            <class name="tests.api.NotesApiTests"/>
         </classes>
     </test>
 </suite>

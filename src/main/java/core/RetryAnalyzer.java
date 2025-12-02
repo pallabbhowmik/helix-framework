@@ -10,13 +10,23 @@ public class RetryAnalyzer implements IRetryAnalyzer {
     private static final Logger log = LoggerFactory.getLogger(RetryAnalyzer.class);
 
     private int retryCount = 0;
-    private static final int MAX_RETRY_COUNT = initMaxRetry();
 
-    private static int initMaxRetry() {
+    /**
+     * Maximum retry attempts controlled via:
+     *   -Dtest.retry.count=#
+     * Example:
+     *   gradle test -Dtest.retry.count=3
+     */
+    private static final int MAX_RETRY_COUNT = resolveRetryCount();
+
+    private static int resolveRetryCount() {
         String value = System.getProperty("test.retry.count", "2");
         try {
-            return Integer.parseInt(value);
+            int parsed = Integer.parseInt(value);
+            log.info("Retry logic enabled — Max retry count: {}", parsed);
+            return parsed;
         } catch (NumberFormatException e) {
+            log.warn("Invalid test.retry.count='{}'. Falling back to default value: 2", value);
             return 2;
         }
     }
@@ -25,10 +35,21 @@ public class RetryAnalyzer implements IRetryAnalyzer {
     public boolean retry(ITestResult result) {
         if (retryCount < MAX_RETRY_COUNT) {
             retryCount++;
-            log.warn("Retrying test '{}' (attempt {} of {})",
-                    result.getMethod().getMethodName(), retryCount, MAX_RETRY_COUNT);
+            log.warn(
+                    "Retrying test '{}' for class [{}] (attempt {} of {})",
+                    result.getMethod().getMethodName(),
+                    result.getTestClass().getName(),
+                    retryCount,
+                    MAX_RETRY_COUNT
+            );
             return true;
         }
+
+        log.error(
+                "Test '{}' FAILED after {} retries — no more attempts",
+                result.getMethod().getMethodName(),
+                MAX_RETRY_COUNT
+        );
         return false;
     }
 }

@@ -2,10 +2,14 @@ package pages;
 
 import core.BasePage;
 import org.openqa.selenium.By;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AppPage extends BasePage {
 
-    private final By btnLaunchDashboard = By.xpath("//button[text() = 'Launch dashboard']");
+    private static final Logger log = LoggerFactory.getLogger(AppPage.class);
+
+    private final By btnLaunchDashboard  = By.xpath("//button[text() = 'Launch dashboard']");
     private final By btnBrowseChallenges = By.xpath("//button[text() = 'Browse challenges']");
     private final By btnProductDiscovery = By.xpath("//h3[text() = 'Product discovery']");
 
@@ -14,14 +18,20 @@ public class AppPage extends BasePage {
     }
 
     public boolean isLaunchDashboardVisible() {
-        return isVisible(btnLaunchDashboard);
+        boolean visible = isVisible(btnLaunchDashboard);
+        log.info("Launch Dashboard button visible: {}", visible);
+        return visible;
     }
 
     public boolean isBrowseChallengesEnabled() {
-        return waitForVisible(btnBrowseChallenges).isEnabled();
+        boolean enabled = waitForVisible(btnBrowseChallenges).isEnabled();
+        log.info("Browse Challenges button enabled: {}", enabled);
+        return enabled;
     }
 
     public boolean isProductDiscoveryVisible() {
-        return isVisible(btnProductDiscovery);
+        boolean visible = isVisible(btnProductDiscovery);
+        log.info("Product Discovery section visible: {}", visible);
+        return visible;
     }
 }
