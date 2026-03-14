@@ -1,6 +1,7 @@
 package pages;
 
 import core.BasePage;
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +12,10 @@ public class HomePage extends BasePage {
 
     private final By loginButton = By.xpath("//div/a[text() = 'Login']");
 
-    public HomePage() {
-        super();
-    }
-
-    public void clickLogin() {
+    @Step("Click Login button on Home page")
+    public LoginPage clickLogin() {
         log.info("Clicking Login button on Home page");
         click(loginButton);
+        return new LoginPage();
     }
 }

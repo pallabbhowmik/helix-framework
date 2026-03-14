@@ -4,63 +4,62 @@ import config.ConfigManager;
 import core.DriverManager;
 import core.LogCleaner;
 import core.WebDriverFactory;
+import io.qameta.allure.Step;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import pages.AppPage;
 import pages.HomePage;
-import pages.LoginPage;
 
+/**
+ * Base class for all UI tests.
+ * Manages WebDriver lifecycle per test method and provides
+ * common actions like login.
+ *
+ * <p>Uses @BeforeMethod/@AfterMethod to ensure each test gets
+ * a fresh browser instance — preventing state leakage between tests.</p>
+ */
 public abstract class BaseTest {
 
     protected WebDriver driver;
     private static final Logger log = LoggerFactory.getLogger(BaseTest.class);
 
-    @BeforeClass(alwaysRun = true)
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
         LogCleaner.clean();
-        log.info("==== Test Class Setup Started: {} ====", this.getClass().getSimpleName());
+        ConfigManager.validate("HELIX_BASE_URL");
+
+        log.info("==== Test Setup: {} | Browser: {} | Env: {} ====",
+                this.getClass().getSimpleName(),
+                ConfigManager.getBrowser(),
+                ConfigManager.getEnv().getName());
+
         WebDriver createdDriver = WebDriverFactory.create();
         DriverManager.setDriver(createdDriver);
         driver = createdDriver;
 
         String baseUrl = ConfigManager.getBaseUrl();
-        if (baseUrl == null || baseUrl.isEmpty()) {
-            log.error("Base URL is not configured in ConfigManager");
-            throw new IllegalStateException("Base URL is not configured in ConfigManager.");
-        }
-
-        log.info("Navigating to base URL: {}", baseUrl);
+        log.info("Navigating to: {}", baseUrl);
         driver.get(baseUrl);
     }
 
-    @AfterClass(alwaysRun = true)
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
-        log.info("==== Test Class Teardown Started: {} ====", this.getClass().getSimpleName());
+        log.info("==== Test Teardown: {} ====", this.getClass().getSimpleName());
         DriverManager.quitDriver();
-        log.info("==== Test Class Teardown Finished: {} ====", this.getClass().getSimpleName());
     }
 
-    protected void login() {
+    @Step("Login with configured credentials")
+    protected AppPage login() {
+        ConfigManager.validate("HELIX_USERNAME", "HELIX_PASSWORD");
+
         String user = ConfigManager.getUsername();
         String pwd  = ConfigManager.getPassword();
 
-        if (user != null && pwd != null && !user.isEmpty() && !pwd.isEmpty()) {
-            log.info("Starting login with user '{}'", user);
-            HomePage home = new HomePage();
-            home.clickLogin();
-
-            LoginPage loginPage = new LoginPage();
-            loginPage.enterEmail(user);
-            loginPage.enterPassword(pwd);
-            loginPage.clickSignInButton();
-            log.info("Login flow executed for user '{}'", user);
-        } else {
-            log.error("Username or password not configured. user='{}', pwdNull={}", user, pwd == null);
-            throw new IllegalStateException(
-                    "Username or password not configured. Check ConfigManager properties."
-            );
-        }
+        log.info("Logging in as: {}", user);
+        HomePage home = new HomePage();
+        return home.clickLogin().loginAs(user, pwd);
     }
 }

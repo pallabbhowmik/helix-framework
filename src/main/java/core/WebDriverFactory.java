@@ -1,5 +1,6 @@
 package core;
 
+import config.BrowserType;
 import config.ConfigManager;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
@@ -12,65 +13,80 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-
-public class WebDriverFactory {
+/**
+ * Factory for creating WebDriver instances.
+ * Uses the Factory design pattern to encapsulate browser-specific initialization.
+ * Thread-safe when combined with {@link DriverManager} ThreadLocal storage.
+ */
+public final class WebDriverFactory {
 
     private static final Logger log = LoggerFactory.getLogger(WebDriverFactory.class);
 
+    private WebDriverFactory() {
+        // prevent instantiation
+    }
+
     public static WebDriver create() {
-        boolean headless = Boolean.parseBoolean(System.getProperty("headless", "false"));
-        String browser = ConfigManager.getBrowser();
+        boolean headless = ConfigManager.isHeadless();
+        BrowserType browserType = ConfigManager.getBrowserType();
 
-        if (browser == null || browser.isEmpty()) {
-            browser = "chrome";
-        }
-
-        log.info("Creating WebDriver instance: browser='{}', headless={}", browser, headless);
+        log.info("Creating WebDriver: browser='{}', headless={}", browserType.getName(), headless);
 
         WebDriver driver;
 
-        switch (browser.toLowerCase()) {
-            case "firefox": {
-                WebDriverManager.firefoxdriver().setup();
-                FirefoxOptions options = new FirefoxOptions();
-                if (headless) {
-                    options.addArguments("-headless");
-                }
-                log.debug("Initializing FirefoxDriver with options: {}", options);
-                driver = new FirefoxDriver(options);
+        switch (browserType) {
+            case FIREFOX:
+                driver = createFirefox(headless);
                 break;
-            }
-
-            case "edge": {
-                WebDriverManager.edgedriver().setup();
-                EdgeOptions options = new EdgeOptions();
-                if (headless) {
-                    options.addArguments("--headless=new");
-                }
-                log.debug("Initializing EdgeDriver with options: {}", options);
-                driver = new EdgeDriver(options);
+            case EDGE:
+                driver = createEdge(headless);
                 break;
-            }
-
-            case "chrome":
-            default: {
-                WebDriverManager.chromedriver().setup();
-                ChromeOptions options = new ChromeOptions();
-                if (headless) {
-                    options.addArguments("--headless=new");
-                }
-                log.debug("Initializing ChromeDriver with options: {}", options);
-                driver = new ChromeDriver(options);
+            case CHROME:
+            default:
+                driver = createChrome(headless);
                 break;
-            }
         }
 
-
-       // driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.manage().window().maximize();
-
-        log.info("WebDriver created and configured successfully");
+        log.info("WebDriver created and configured for: {}", browserType.getName());
         return driver;
+    }
+
+    private static WebDriver createChrome(boolean headless) {
+        WebDriverManager.chromedriver().setup();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments(
+                "--disable-notifications",
+                "--disable-popup-blocking",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--remote-allow-origins=*"
+        );
+        if (headless) {
+            options.addArguments("--headless=new", "--window-size=1920,1080");
+        }
+        log.debug("ChromeDriver options configured");
+        return new ChromeDriver(options);
+    }
+
+    private static WebDriver createFirefox(boolean headless) {
+        WebDriverManager.firefoxdriver().setup();
+        FirefoxOptions options = new FirefoxOptions();
+        if (headless) {
+            options.addArguments("-headless");
+        }
+        log.debug("FirefoxDriver options configured");
+        return new FirefoxDriver(options);
+    }
+
+    private static WebDriver createEdge(boolean headless) {
+        WebDriverManager.edgedriver().setup();
+        EdgeOptions options = new EdgeOptions();
+        options.addArguments("--disable-notifications", "--no-sandbox");
+        if (headless) {
+            options.addArguments("--headless=new", "--window-size=1920,1080");
+        }
+        log.debug("EdgeDriver options configured");
+        return new EdgeDriver(options);
     }
 }

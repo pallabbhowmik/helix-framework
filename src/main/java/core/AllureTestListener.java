@@ -76,29 +76,27 @@ public class AllureTestListener implements ITestListener {
         String methodName = result.getMethod().getMethodName();
         log.error("Test FAILED: {}. Capturing screenshot and logs.", methodName);
 
-        attachScreenshot("Failure - " + methodName);
-        attachLogFile("Logs - " + methodName);
+        attachScreenshot("Failure Screenshot - " + methodName);
+        attachLogFile("Execution Log - " + methodName);
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
-        String methodName = result.getMethod().getMethodName();
-        log.warn("Test SKIPPED: {}", methodName);
-        // Optional:
-        // attachLogFile("Logs (skipped) - " + methodName);
+        log.warn("Test SKIPPED: {}", result.getMethod().getMethodName());
     }
 
     @Override
     public void onTestStart(ITestResult result) {
-        log.info("Test STARTED: {}", result.getMethod().getMethodName());
+        log.info("Test STARTED: {}.{}",
+                result.getTestClass().getRealClass().getSimpleName(),
+                result.getMethod().getMethodName());
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
-        String methodName = result.getMethod().getMethodName();
-        log.info("Test PASSED: {}", methodName);
-        // Attach logs even for success
-        attachLogFile("Logs (success) - " + methodName);
+        log.info("Test PASSED: {} ({}ms)",
+                result.getMethod().getMethodName(),
+                result.getEndMillis() - result.getStartMillis());
     }
 
     @Override
@@ -108,11 +106,16 @@ public class AllureTestListener implements ITestListener {
 
     @Override
     public void onStart(ITestContext context) {
-        log.info("TestNG context START: {}", context.getName());
+        log.info("Suite STARTED: {}", context.getName());
+        AllureEnvironmentWriter.write();
     }
 
     @Override
     public void onFinish(ITestContext context) {
-        log.info("TestNG context FINISH: {}", context.getName());
+        int passed = context.getPassedTests().size();
+        int failed = context.getFailedTests().size();
+        int skipped = context.getSkippedTests().size();
+        log.info("Suite FINISHED: {} | Passed: {} | Failed: {} | Skipped: {}",
+                context.getName(), passed, failed, skipped);
     }
 }

@@ -1,0 +1,102 @@
+name: CI - Test Automation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  api-tests:
+    name: API Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Create .env.config
+        run: |
+          cat <<EOF > .env.config
+          HELIX_ENV=${{ vars.HELIX_ENV || 'dev' }}
+          HELIX_BASE_URL=${{ secrets.HELIX_BASE_URL }}
+          HELIX_API_BASE_URL=${{ secrets.HELIX_API_BASE_URL }}
+          HELIX_USERNAME=${{ secrets.HELIX_USERNAME }}
+          HELIX_PASSWORD=${{ secrets.HELIX_PASSWORD }}
+          HELIX_BROWSER=chrome
+          HELIX_TIMEOUT=15
+          EOF
+
+      - name: Run API tests
+        run: ./gradlew clean test_API -Dheadless=true
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-api
+          path: build/allure-results/
+          retention-days: 30
+
+  ui-tests:
+    name: UI Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Create .env.config
+        run: |
+          cat <<EOF > .env.config
+          HELIX_ENV=${{ vars.HELIX_ENV || 'dev' }}
+          HELIX_BASE_URL=${{ secrets.HELIX_BASE_URL }}
+          HELIX_API_BASE_URL=${{ secrets.HELIX_API_BASE_URL }}
+          HELIX_USERNAME=${{ secrets.HELIX_USERNAME }}
+          HELIX_PASSWORD=${{ secrets.HELIX_PASSWORD }}
+          HELIX_BROWSER=chrome
+          HELIX_TIMEOUT=15
+          EOF
+
+      - name: Run UI tests (headless)
+        run: ./gradlew clean test_UI -Dheadless=true
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-ui
+          path: build/allure-results/
+          retention-days: 30
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: build/reports/
+          retention-days: 7

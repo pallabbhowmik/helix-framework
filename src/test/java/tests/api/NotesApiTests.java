@@ -1,25 +1,30 @@
 package tests.api;
 
+import io.qameta.allure.*;
 import io.restassured.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.*;
 
+@Epic("API Testing")
+@Feature("Notes API")
 public class NotesApiTests extends BaseApiTest {
 
     private static final Logger log = LoggerFactory.getLogger(NotesApiTests.class);
 
-    @Test
+    @Test(description = "GET /gateway/notes should return 200 with non-empty list")
+    @Severity(SeverityLevel.CRITICAL)
+    @Story("Fetch Notes")
     public void shouldReturnNotesList() {
-        log.info("Verifying that notes endpoint returns 200 and a non-empty list");
+        log.info("Verifying notes endpoint returns 200 and a non-empty list");
 
         Response response =
                 given()
@@ -27,19 +32,20 @@ public class NotesApiTests extends BaseApiTest {
                         .get("/gateway/notes")
                         .then()
                         .statusCode(200)
+                        .body("data", is(notNullValue()))
+                        .body("data.size()", greaterThan(0))
                         .extract()
                         .response();
 
         List<?> notes = response.jsonPath().getList("data");
-        log.info("Notes endpoint returned {} notes", notes != null ? notes.size() : 0);
-
-        Assert.assertNotNull(notes, "Notes list should not be null");
-        Assert.assertFalse(notes.isEmpty(), "Notes list should not be empty");
+        log.info("Notes endpoint returned {} notes", notes.size());
     }
 
-    @Test
+    @Test(description = "Notes list should contain admin note with expected fields")
+    @Severity(SeverityLevel.NORMAL)
+    @Story("Fetch Notes")
     public void shouldContainAdminNote() {
-        log.info("Validating that notes list contains admin note");
+        log.info("Validating notes list contains admin note");
 
         given()
                 .when()
@@ -50,33 +56,37 @@ public class NotesApiTests extends BaseApiTest {
                 .body("data.id[0]", equalTo("note-001"));
     }
 
-    @Test
+    @Test(description = "Filter objects by price from external REST API")
+    @Severity(SeverityLevel.MINOR)
+    @Story("External API Integration")
     public void shouldFilterRestfulApiObjectsByPrice() {
-        log.info("Calling external sample API: https://api.restful-api.dev/objects");
+        log.info("Testing external API: restful-api.dev");
 
         Response response =
                 given()
                         .baseUri("https://api.restful-api.dev")
-                        .log().all()   // log REQUEST
+                        .log().all()
                         .when()
                         .get("/objects")
                         .then()
-                        .log().all()   // log RESPONSE
+                        .log().all()
                         .statusCode(200)
                         .extract()
                         .response();
 
-        // Item with id = 3
         Map<String, Object> item =
                 response.jsonPath().getMap("find { it.id == '3' }.data");
-        log.info("Item with id=3 data: {}", item);
 
-        // All objects where data.price > 50
         List<Map<String, Object>> expensiveItems =
                 response.jsonPath().getList(
                         "findAll { it.data != null && it.data.price != null && it.data.price > 50 }"
                 );
 
-        log.info("Found {} items with price > 50", expensiveItems.size());
+        SoftAssert soft = new SoftAssert();
+        soft.assertNotNull(item, "Item with id=3 should exist");
+        soft.assertTrue(expensiveItems.size() > 0, "Should have items with price > 50");
+        soft.assertAll();
+
+        log.info("Item id=3 data: {} | Expensive items count: {}", item, expensiveItems.size());
     }
 }

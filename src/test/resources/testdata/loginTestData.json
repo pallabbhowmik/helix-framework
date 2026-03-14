@@ -8,5 +8,15 @@
     "email": "fake@test.com",
     "password": "wrongpass",
     "expectedStatus": 401
+  },
+  {
+    "email": "",
+    "password": "",
+    "expectedStatus": 400
+  },
+  {
+    "email": "admin@passthenote.com",
+    "password": "WrongPassword",
+    "expectedStatus": 401
   }
 ]

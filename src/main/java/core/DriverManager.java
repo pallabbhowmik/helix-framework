@@ -4,10 +4,17 @@ import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DriverManager {
+/**
+ * Thread-safe WebDriver holder using {@link ThreadLocal}.
+ * Ensures each test thread gets its own WebDriver instance,
+ * enabling safe parallel execution.
+ *
+ * <p>Lifecycle: setUp() calls {@link #setDriver(WebDriver)},
+ * tearDown() calls {@link #quitDriver()} to prevent resource leaks.</p>
+ */
+public final class DriverManager {
 
     private static final Logger log = LoggerFactory.getLogger(DriverManager.class);
-
     private static final ThreadLocal<WebDriver> driverHolder = new ThreadLocal<>();
 
     private DriverManager() {
@@ -17,13 +24,14 @@ public class DriverManager {
     public static WebDriver getDriver() {
         WebDriver driver = driverHolder.get();
         if (driver == null) {
-            log.warn("getDriver() called but no WebDriver is associated with current thread");
+            log.warn("getDriver() called but no WebDriver is set for thread: {}",
+                    Thread.currentThread().getName());
         }
         return driver;
     }
 
     public static void setDriver(WebDriver driver) {
-        log.info("Associating WebDriver with current thread: {}", Thread.currentThread().getName());
+        log.info("Setting WebDriver for thread: {}", Thread.currentThread().getName());
         driverHolder.set(driver);
     }
 
@@ -39,7 +47,14 @@ public class DriverManager {
                 driverHolder.remove();
             }
         } else {
-            log.warn("quitDriver() called but WebDriver is already null for current thread");
+            log.debug("quitDriver() called but WebDriver is already null");
         }
+    }
+
+    /**
+     * Checks if a WebDriver is currently active for this thread.
+     */
+    public static boolean hasDriver() {
+        return driverHolder.get() != null;
     }
 }

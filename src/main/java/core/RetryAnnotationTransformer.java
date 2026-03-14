@@ -12,6 +12,7 @@ public class RetryAnnotationTransformer implements IAnnotationTransformer {
 
     private static final Logger log = LoggerFactory.getLogger(RetryAnnotationTransformer.class);
 
+    @SuppressWarnings({"rawtypes"})
     @Override
     public void transform(ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {
 
